@@ -1,12 +1,14 @@
 <?php
 
-trait ArrayQuery {
+abstract class ArrayQuery{
 
     abstract public function &get ($path = '', $default = null);
     abstract public function set ($value, $path = null);
     abstract function getSeparator ();
 
     public static function createWrapper($data){
+        if(is_null($data)) $data =[];
+        if(!is_array($data)) $data=[$data];
         return new static($data);
     }
 
@@ -235,6 +237,33 @@ trait ArrayQuery {
         return $obj;
     }
 
+    //remove all data except the data with specific keys
+    //**NOTE**: this function only handle the leaf node in multi-dimension array!
+    public function reserve(array $keys){
+        $data = $this->get();
+        $allkeys=[];
+        array_walk_recursive($data, function($value, $key)use(&$allkeys){ $allkeys[]=$key; });
+        $keys=array_diff($allkeys, $keys);
+        return $this->delete($keys);
+    }
+
+    public function delete(array $keys){
+        $sep = $this->getSeparator();
+        $paths = $this->findPathsByKey($keys);
+        array_map(function($path) use ($keys, $sep){
+            list($higherPath, $current)=$this->getHigerLevelPath($path, $sep, true);
+            $row =$this->get($higherPath);
+            unset($row[$current]);
+
+            if($higherPath=='')
+                $this->set($row);
+            else
+                $this->set($row, $higherPath);
+        }, $paths);
+
+        return $this;
+    }
+
     public function force(){
         $this->_searchOptions=array_merge($this->_searchOptions, ['forceUpdateMode'=>true]);
         return $this;
@@ -376,6 +405,11 @@ trait ArrayQuery {
 
     public function &getParent(){
         return $this->_parent;
+    }
+
+    public function &resetParent(){
+       $this->_parent=null;
+       return $this;
     }
 
     private $_searchOptions=[
