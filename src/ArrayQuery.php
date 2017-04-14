@@ -318,7 +318,11 @@ abstract class ArrayQuery{
         list($path, $last) = static::getHigerLevelPath($path, $sep, true);
         $curData=$this->get($path);
         unset($curData[$last]);
-        $this->set($curData, $path);
+        if($path=='')
+            $this->set($curData);
+        else
+            $this->set($curData, $path);
+            
         return $this;
     }
 
