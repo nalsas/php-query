@@ -13,7 +13,7 @@ class ArrayAsPath extends ArrayQuery{
     }
 
     public function set ($value, $path = null) {
-        if (!isset($path)) {
+        if (empty($path)) {
             $this->data = $value;
         }
 
