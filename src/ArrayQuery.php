@@ -202,6 +202,11 @@ abstract class ArrayQuery{
         return $this;
     }
     
+    public function filter(callable $operation){
+        $this->set(array_filter($this->get(), $operation));
+        return $this;
+    }
+    
     public function mapRoot(callable $operation){
         $separator =$this->getSeparator();
         $obj = $this;
