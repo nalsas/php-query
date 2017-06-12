@@ -1,5 +1,6 @@
 <?php
 //可重复运行
+require_once(__DIR__ . '/../src/ArrayQuery.php');
 require_once(__DIR__ . '/../src/ArrayAsPath.php');
 
 class ArrayQueryTest extends CTestCase
@@ -53,7 +54,7 @@ class ArrayQueryTest extends CTestCase
         $data =json_decode($this->testData1, true);
         //print_r(ArrayAsPath::createWrapper($data)->find('*')->get());
         $this->assertEquals(count(ArrayAsPath::createWrapper($data)->find('parameter_id == *')->get()),26);
-        $this->assertEquals(count(ArrayAsPath::createWrapper($data)->find('display_name == *')->get()),36);
+        $this->assertEquals(count(ArrayAsPath::createWrapper($data)->find('display_name == *')->get()),34);
         $this->assertEquals(count(ArrayAsPath::createWrapper($data)->setOptions(['compareMode'=>'fuzzy', 'resultMode'=>'value'])->find('display_name == 系统')->get()),9);
 
         //$t = microtime(true);
