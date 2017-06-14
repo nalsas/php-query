@@ -153,7 +153,7 @@ abstract class ArrayQuery{
 
             foreach($paths as $path){
                 array_map(function($k, $v) use ($path, $sep){
-                    $higherPath =static::getHigerLevelPath($path, $sep);
+                    $higherPath =static::getHigherLevelPath($path, $sep);
                     $calculated=is_callable($v)?$v($this->get($higherPath)):$v;
                     //echo $higherPath.$sep.$k."\n";
                     $this->set($calculated, $higherPath.$sep.$k);
@@ -189,10 +189,43 @@ abstract class ArrayQuery{
         array_map(function($k, $v) use ($paths, $sep){
             if(!isset($paths[$k])) return;
             foreach($paths[$k] as $path){
-                $calculated=is_callable($v)?$v($this->get(static::getHigerLevelPath($path, $sep))):$v;
+                $calculated=is_callable($v)?$v($this->get(static::getHigherLevelPath($path, $sep))):$v;
                 $this->set($calculated, $path);
             }
         }, array_keys($values), $values);
+
+        return $this;
+    }
+    
+    public function renameKey(array $keyMap){
+        $sep = $this->getSeparator();
+        $conditions = [];
+        $paths =[];
+        foreach($keyMap as $key=>$value){
+            $func = function($k, $v) use ($key){
+                return $k===$key;
+            };
+            $conditions[]=$func;
+        }
+
+        if(empty($conditions)) throw new Exception('empty input is not allowed!');
+        $data = $this->get();
+
+        $matchMode = $this->_searchOptions['matchMode'];
+        $this->_searchOptions['matchMode'] = 'or';
+        $this->_find($data, $conditions, $this->getSeparator(), $paths);
+        $this->_searchOptions['matchMode'] = $matchMode;
+
+        array_map(function($oldkey, $newkey) use ($paths, $sep){
+            if(!isset($paths[$oldkey])) return;
+            foreach($paths[$oldkey] as $path){
+                $higherLevelPath = static::getHigherLevelPath($path, $sep);
+                $parent=$this->get($higherLevelPath);
+                $parent[$newkey]=$parent[$oldkey];
+                unset($parent[$oldkey]);
+                $this->set($parent, $higherLevelPath);
+            }
+        }, array_keys($keyMap), $keyMap);
 
         return $this;
     }
@@ -214,7 +247,7 @@ abstract class ArrayQuery{
 
         $paths=static::createWrapper($this->_limitPathResult)->valueMode()->find('*')->get();
         array_map(function($path) use($obj, $separator, $operation){
-            $rowPath =$this->_searchOptions['resultMode']==='value'?$path:static::getHigerLevelPath($path, $separator);
+            $rowPath =$this->_searchOptions['resultMode']==='value'?$path:static::getHigherLevelPath($path, $separator);
             $row =$obj->get($rowPath);
             if(is_array($rowPath)) {var_dump($rowPath);die();}
             $obj->set($operation($row), $rowPath);
@@ -233,7 +266,7 @@ abstract class ArrayQuery{
 
         $paths=static::createWrapper($this->_limitPathResult)->valueMode()->find('*')->get();
         array_map(function($path) use($values, $obj, $separator){
-            $rowPath = static::getHigerLevelPath($path, $separator);
+            $rowPath = static::getHigherLevelPath($path, $separator);
             $row =$obj->get($rowPath);
             foreach($values as $key=>$value){
                 //get row
@@ -257,8 +290,8 @@ abstract class ArrayQuery{
         $paths=static::createWrapper($this->_limitPathResult)->valueMode()->find('*')->get();
         array_map(function($path) use($keys, $obj, $sep){
             if(!isset($keys)){
-                $rowPath = static::getHigerLevelPath($path, $sep);
-                list($parentPath, $rowKey) = static::getHigerLevelPath($rowPath, $sep, true);
+                $rowPath = static::getHigherLevelPath($path, $sep);
+                list($parentPath, $rowKey) = static::getHigherLevelPath($rowPath, $sep, true);
                 if($rowPath!=$parentPath){
                     $rowParent =$obj->get($parentPath);
                     unset($rowParent[$rowKey]);
@@ -266,7 +299,7 @@ abstract class ArrayQuery{
                 }
             }
             else{
-                $rowPath = static::getHigerLevelPath($path, $sep);
+                $rowPath = static::getHigherLevelPath($path, $sep);
                 $row =$obj->get($rowPath);
                 foreach($keys as $key){
                     unset($row[$key]);
@@ -291,7 +324,7 @@ abstract class ArrayQuery{
         $sep = $this->getSeparator();
         $paths = $this->findPathsByKey($keys);
         array_map(function($path) use ($keys, $sep){
-            list($higherPath, $current)=static::getHigerLevelPath($path, $sep, true);
+            list($higherPath, $current)=static::getHigherLevelPath($path, $sep, true);
             $row =$this->get($higherPath);
             unset($row[$current]);
 
@@ -320,7 +353,7 @@ abstract class ArrayQuery{
         }
         $sep=$this->getSeparator();
 
-        list($path, $last) = static::getHigerLevelPath($path, $sep, true);
+        list($path, $last) = static::getHigherLevelPath($path, $sep, true);
         $curData=$this->get($path);
         unset($curData[$last]);
         if($path=='')
@@ -336,7 +369,7 @@ abstract class ArrayQuery{
         $sep = $this->getSeparator();
         $paths = $this->findPathsByKey($keys);
         array_map(function($path) use ($kv, $sep){
-            list($higherPath, $current)=static::getHigerLevelPath($path, $sep, true);
+            list($higherPath, $current)=static::getHigherLevelPath($path, $sep, true);
             if(isset($kv[$current])){
                 $dest =$kv[$current];
                 $row = $this->get($higherPath);
@@ -369,7 +402,7 @@ abstract class ArrayQuery{
         return $ret;
     }
 
-    public static function getHigerLevelPath($path, $sep, $returnAll=false){
+    public static function getHigherLevelPath($path, $sep, $returnAll=false){
         $paths=explode($sep, $path);
         $last=array_pop($paths);
         return $returnAll?[implode($sep,$paths), $last]:implode($sep,$paths);
@@ -404,8 +437,8 @@ abstract class ArrayQuery{
             while($obj->getParent()!=NULL) $obj = $obj->getParent();
             foreach ($result as $k=>&$paths){
                 usort($paths, function($path1, $path2)use($criteria, $sep, $obj){
-                    $path1=static::getHigerLevelPath($path1, $sep);
-                    $path2=static::getHigerLevelPath($path2, $sep);
+                    $path1=static::getHigherLevelPath($path1, $sep);
+                    $path2=static::getHigherLevelPath($path2, $sep);
                     return $criteria($obj->get($path1), $obj->get($path2));
                 });
             }
@@ -424,13 +457,13 @@ abstract class ArrayQuery{
         $paths = [];
         $this->findRoot()->find($query, $paths);
         $paths = static::createWrapper($paths)->valueMode()->find('*')->get();
-        $paths = array_map(function($v) use($sep){ return static::getHigerLevelPath($v, $sep);}, $paths);
+        $paths = array_map(function($v) use($sep){ return static::getHigherLevelPath($v, $sep);}, $paths);
 
         $finalPaths=$this->getPaths();
         //make result mode in $results align with parent
         foreach($finalPaths as $key=>&$destPaths){
             $newPaths=array_filter($destPaths, function($path) use($paths, $sep){
-                return !in_array(static::getHigerLevelPath($path,$sep), $paths);
+                return !in_array(static::getHigherLevelPath($path,$sep), $paths);
             });
             $finalPaths[$key] = $newPaths;
         }
