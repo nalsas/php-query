@@ -94,7 +94,6 @@ abstract class ArrayQuery{
             }
 
             if(!is_null($destKey)){
-                //echo $destKey.' '.$key.' '.$dest."\n";
                 return ($destKey.''===$key.'') && ($dest==='*'?true:$compfunc($value, $dest));
             }else{
                 return $dest==='*'?true:$compfunc($value, $dest);
@@ -110,6 +109,7 @@ abstract class ArrayQuery{
         $result = [];
         foreach($data as $key=>&$value){
            if(is_array($value)){
+              //$path[$key]=$curPath.$sep.$key;
               $result = array_merge($result, $this->_find($value, $conditions, $sep,  $path, $curPath.$sep.$key));
            }else{
                $match=array_map(function($func) use($key, $value){
@@ -155,7 +155,6 @@ abstract class ArrayQuery{
                 array_map(function($k, $v) use ($path, $sep){
                     $higherPath =static::getHigherLevelPath($path, $sep);
                     $calculated=is_callable($v)?$v($this->get($higherPath)):$v;
-                    //echo $higherPath.$sep.$k."\n";
                     $this->set($calculated, $higherPath.$sep.$k);
                 }, array_keys($values), $values);
             }
@@ -200,7 +199,6 @@ abstract class ArrayQuery{
     public function renameKey(array $keyMap){
         $sep = $this->getSeparator();
         $conditions = [];
-        $paths =[];
         foreach($keyMap as $key=>$value){
             $func = function($k, $v) use ($key){
                 return $k===$key;
@@ -209,16 +207,10 @@ abstract class ArrayQuery{
         }
 
         if(empty($conditions)) throw new Exception('empty input is not allowed!');
-        $data = $this->get();
 
-        $matchMode = $this->_searchOptions['matchMode'];
-        $this->_searchOptions['matchMode'] = 'or';
-        $this->_find($data, $conditions, $this->getSeparator(), $paths);
-        $this->_searchOptions['matchMode'] = $matchMode;
-
+        $paths = $this->findPathsByKey(array_keys($keyMap));
         array_map(function($oldkey, $newkey) use ($paths, $sep){
-            if(!isset($paths[$oldkey])) return;
-            foreach($paths[$oldkey] as $path){
+            foreach($paths as $path){
                 $higherLevelPath = static::getHigherLevelPath($path, $sep);
                 $parent=$this->get($higherLevelPath);
                 $parent[$newkey]=$parent[$oldkey];
