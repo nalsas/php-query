@@ -208,8 +208,8 @@ abstract class ArrayQuery{
 
         if(empty($conditions)) throw new Exception('empty input is not allowed!');
 
-        $paths = $this->findPathsByKey(array_keys($keyMap));
-        array_map(function($oldkey, $newkey) use ($paths, $sep){
+        array_map(function($oldkey, $newkey) use ($sep){
+            $paths = $this->findPathsByKey([$oldkey]);
             foreach($paths as $path){
                 $higherLevelPath = static::getHigherLevelPath($path, $sep);
                 $parent=$this->get($higherLevelPath);
