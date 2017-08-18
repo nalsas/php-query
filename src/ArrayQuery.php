@@ -1,7 +1,6 @@
 <?php
 
 abstract class ArrayQuery{
-
     abstract public function &get ($path = '', $default = null);
     abstract public function set ($value, $path = null);
     abstract function getSeparator ();
@@ -513,6 +512,20 @@ abstract class ArrayQuery{
        $this->_parent=null;
        return $this;
     }
+   
+    // 'class' in $config means the plugin's class name
+    // later in getPluginInst, we will pass the class instance to the constructor of plugin's class to instantiate
+    // plugin when needed
+    public static function addPlugin(array $config){
+        self::$_plugins[@$config['name']]=['class'=>$config['class']];
+    }
+    
+    public function getPluginInst($name){
+        if(!isset(self::$_plugins[$name]['inst'])){
+            self::$_plugins[$name]['inst']=new self::$_plugins[$name]['class']($this);
+        }
+        return self::$_plugins[$name]['inst'];
+    }
 
     private $_searchOptions=[
         'matchMode'=>'and',
@@ -523,4 +536,5 @@ abstract class ArrayQuery{
 
     private $_limitPathResult=null;
     private $_parent=null;
+    private static $_plugins=[];
 }
