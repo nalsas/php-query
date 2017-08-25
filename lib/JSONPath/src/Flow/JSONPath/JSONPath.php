@@ -176,7 +176,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
     
     public function jsonPointers(){
-        return $this->paths();
+        $paths = $this->paths();
+        $paths = array_map(function($path){
+            return trim(str_replace("'",'',str_replace('][','/',str_replace('$[', '/', $path))),']');
+        }, $paths->data());
+        return $paths;
     }
 
     public function offsetExists($offset)

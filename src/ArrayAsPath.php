@@ -29,7 +29,8 @@ class ArrayAsPath extends ArrayQuery{
                 $code .= 'return $this->data'.$pices.' = $value;';
             }
         }
-        return eval($code);
+        $ret=eval($code);
+        return $ret?$this:$ret;
     }
 
     public function &get ($path = '', $default = []) {

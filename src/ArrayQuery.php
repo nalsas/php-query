@@ -521,10 +521,7 @@ abstract class ArrayQuery{
     }
     
     public function getPluginInst($name){
-        if(!isset(self::$_plugins[$name]['inst'])){
-            self::$_plugins[$name]['inst']=new self::$_plugins[$name]['class']($this);
-        }
-        return self::$_plugins[$name]['inst'];
+        return new self::$_plugins[$name]['class']($this);
     }
 
     private $_searchOptions=[
