@@ -1,6 +1,7 @@
 <?php
 
 abstract class ArrayQuery{
+
     abstract public function &get ($path = '', $default = null);
     abstract public function set ($value, $path = null);
     abstract function getSeparator ();
@@ -93,7 +94,11 @@ abstract class ArrayQuery{
             }
 
             if(!is_null($destKey)){
-                return ($destKey.''===$key.'') && ($dest==='*'?true:$compfunc($value, $dest));
+                if(substr($destKey,-1,1)=='*'){
+                    //do not use regex now for performance considering
+                    return (strpos($key.'', rtrim($destKey,'*'))===0) && ($dest==='*'?true:$compfunc($value, $dest));
+                }else
+                    return ($destKey.''===$key.'') && ($dest==='*'?true:$compfunc($value, $dest));
             }else{
                 return $dest==='*'?true:$compfunc($value, $dest);
             }
@@ -240,7 +245,6 @@ abstract class ArrayQuery{
         array_map(function($path) use($obj, $separator, $operation){
             $rowPath =$this->_searchOptions['resultMode']==='value'?$path:static::getHigherLevelPath($path, $separator);
             $row =$obj->get($rowPath);
-            if(is_array($rowPath)) {var_dump($rowPath);die();}
             $obj->set($operation($row), $rowPath);
         }, $paths);
 
@@ -461,6 +465,23 @@ abstract class ArrayQuery{
         return $this->setLimitPathResult($finalPaths);
     }
 
+    /**
+     *  Clean the inner array of result array
+     */
+    public function clean($white_list=[]){
+        $obj=$this->get();
+        $obj=array_map(function($row)use($white_list){
+            foreach ($row as $k=>$field){
+                if(is_array($field)&&!in_array($k, $white_list)){
+                    unset($row[$k]);
+                }
+            }
+            return $row;
+        }, $obj);
+        $this->set($obj);
+        return $this;
+    }
+
     public function findRoot(){
         $obj=$this;
         while($obj->getParent()!=NULL) $obj = $obj->getParent();
@@ -512,17 +533,18 @@ abstract class ArrayQuery{
        $this->_parent=null;
        return $this;
     }
-   
+
     // 'class' in $config means the plugin's class name
     // later in getPluginInst, we will pass the class instance to the constructor of plugin's class to instantiate
     // plugin when needed
     public static function addPlugin(array $config){
         self::$_plugins[@$config['name']]=['class'=>$config['class']];
     }
-    
+
     public function getPluginInst($name){
         return new self::$_plugins[$name]['class']($this);
     }
+
 
     private $_searchOptions=[
         'matchMode'=>'and',

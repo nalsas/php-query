@@ -138,6 +138,31 @@ class ArrayQueryTest extends CTestCase
 
         $ret=ArrayAsPath::createWrapper($testArr)->reserve(['apple']);
         echo json_encode($ret->get());
+
+        $testArr4 = [
+            'obj_32323' => null,
+            'foo' =>[
+                'obj_1231' => ['taste'=>'sweet'],
+                2 => 'good',
+                'pear' => 'big',
+                'good' => null,
+                'foo' => 10,
+                'obj_5555' => [
+                    'obj_67777'=>10,
+                ],
+            ],
+            'count'=>9,
+            'apple'=>10,
+            20
+        ];
+
+        $path=[];
+
+        //Only leaf node will be return
+        $ret=ArrayAsPath::createWrapper($testArr4)->find('obj_*==*', $path);
+        $this->assertEquals('[{"obj_32323":null,"foo":{"obj_1231":{"taste":"sweet"},"2":"good","pear":"big","good":null,"foo":10,"obj_5555":{"obj_67777":10}},"count":9,"apple":10,"0":20},{"obj_67777":10}]',
+            json_encode($ret->get()));
+
         //echo microtime(true) - $t;
         //$data=xhprof_disable();
         //print_r($data);

@@ -3,6 +3,7 @@
 class ArrayAsPathException extends Exception {}
 
 class ArrayAsPath extends ArrayQuery{
+    //use ArrayQuery;
     protected
         $data = [],
         $separator = '/';
