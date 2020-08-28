@@ -3,7 +3,7 @@
 require_once(__DIR__ . '/../src/ArrayQuery.php');
 require_once(__DIR__ . '/../src/ArrayAsPath.php');
 
-class ArrayQueryTest extends CTestCase
+class ArrayQueryTest extends PQTestCase
 {
 
     public function testFind(){
@@ -35,9 +35,9 @@ class ArrayQueryTest extends CTestCase
             20
         ];
 
-        $this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5}]',json_encode(ArrayAsPath::createWrapper($testArr)->find('1')->get()));
+        $this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5}]',json_encode(ArrayAsPath::wrap($testArr)->find('1')->get()));
         $this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5},{"hello":"the world","foo":{"apple":1,"2":"good","pear":"big","good":5},"count":9,"apple":10,"0":20}]',json_encode(ArrayAsPath::createWrapper($testArr)->find('apple==*')->get()));
-        $this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5}]', json_encode(ArrayAsPath::createWrapper($testArr)->find('>=2, <6')->get()));
+        $this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5}]', json_encode(ArrayAsPath::wrap($testArr)->find('>=2, <6')->get()));
 
         //$this->assertEquals('[{"apple":1,"2":"good","pear":"big","good":5}]', json_encode(ArrayAsPath::createWrapper($testArr)->find('apple>0, good<6')->get()));
         //暂时不支持这种用法！！！

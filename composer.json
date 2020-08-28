@@ -2,6 +2,9 @@
     "name": "nalsas/php-query",
     "description": "A chainable, lightweight library for maniplating(i.e. query/update/delete...) deep nested array",
     "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
     "suggest": {
         "flow/jsonpath": "Could be used as a plugin to provide more expressive query syntax"
     },

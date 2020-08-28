@@ -6,10 +6,15 @@ abstract class ArrayQuery{
     abstract public function set ($value, $path = null);
     abstract function getSeparator ();
 
+    //Deprecated, use wrap instead!!
     public static function createWrapper($data){
         if(is_null($data)) $data =[];
         if(!is_array($data)) $data=[$data];
         return new static($data);
+    }
+
+    public static function wrap($data){
+        return static::createWrapper($data);
     }
 
     public function &find($query, &$paths=[]){

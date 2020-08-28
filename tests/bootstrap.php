@@ -1,5 +1,5 @@
 <?php
 
-if(!class_exists('CTestCase')){
-    include_once('CTestCase.php');
+if(!class_exists('PQTestCase')){
+    include_once('PQTestCase.php');
 }
