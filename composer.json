@@ -1,0 +1,16 @@
+{
+    "name": "nalsas/php-query",
+    "description": "A chainable, lightweight library for maniplating(i.e. query/update/delete...) deep nested array",
+    "type": "library",
+    "suggest": {
+        "flow/jsonpath": "Could be used as a plugin to provide more expressive query syntax"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nalsas Dai",
+            "email": "nalsasdai@hotmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
