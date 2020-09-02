@@ -1,4 +1,5 @@
 <?php
+namespace PHPQuery;
 
 abstract class ArrayQuery{
 
@@ -8,13 +9,13 @@ abstract class ArrayQuery{
 
     //Deprecated, use wrap instead!!
     public static function createWrapper($data){
-        if(is_null($data)) $data =[];
-        if(!is_array($data)) $data=[$data];
-        return new static($data);
+        return static::wrap($data);
     }
 
     public static function wrap($data){
-        return static::createWrapper($data);
+        if(is_null($data)) $data =[];
+        if(!is_array($data)) $data=[$data];
+        return new static($data);
     }
 
     public function &find($query, &$paths=[]){

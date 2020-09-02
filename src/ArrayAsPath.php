@@ -1,6 +1,7 @@
 <?php
+namespace PHPQuery;
 
-class ArrayAsPathException extends Exception {}
+class ArrayAsPathException extends \Exception {}
 
 class ArrayAsPath extends ArrayQuery{
     //use ArrayQuery;

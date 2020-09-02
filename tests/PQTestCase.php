@@ -1,3 +1,4 @@
 <?php
-class PQTestCase extends PHPUnit_Framework_TestCase{
+use PHPUnit\Framework\TestCase;
+class PQTestCase extends TestCase{
 };

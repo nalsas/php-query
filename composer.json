@@ -5,6 +5,14 @@
     "require-dev": {
         "phpunit/phpunit": "*"
     },
+    "autoload": {
+        "classmap": [
+            "src"
+        ],
+        "psr-4": {
+            "PHPQuery\\": "src/"
+        }
+    },
     "suggest": {
         "flow/jsonpath": "Could be used as a plugin to provide more expressive query syntax"
     },
