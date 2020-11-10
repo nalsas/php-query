@@ -209,7 +209,7 @@ abstract class Querier implements PathAccessor {
     
     public function mapRoot(callable $operation){
 
-        if($this->getWhenResultPath()==null){
+        if($this->getWhenResultPath()===null){
             throw new QueryException('please call when() first!');
         }
 
