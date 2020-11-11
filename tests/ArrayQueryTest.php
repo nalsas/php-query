@@ -52,6 +52,9 @@ class ArrayQueryTest extends PQTestCase
         $this->assertEquals('[1]', json_encode(ArrayQuery::wrap($testArr)->setOptions(['resultMode'=>'value'])->find('apple==good|1')->get()));
         $this->assertEquals('["good"]',json_encode(ArrayQuery::wrap($testArr)->setOptions(['resultMode'=>'value'])->find('2==1|good')->get()));
 
+        $obj=ArrayQuery::wrap($testArr)->when('appletree==*')->mapRoot(function($v){return $v;})->find('appletree==*');
+        $this->assertEquals('[]', json_encode($obj->get()));
+
         $obj=ArrayQuery::wrap($testArr)->when('apple==*')->deleteRoot(['apple']);
         $this->assertEquals('{"hello":"the world","foo":{"2":"good","pear":"big","good":5},"count":9,"0":20}', json_encode($obj->get()));
 
