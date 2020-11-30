@@ -50,7 +50,7 @@ class ArrayQuery extends Querier{
             $result = &$result[$pathToken];
             $pathToken = strtok($separator);
         }
-        $result =$result ? $result : $default;
+        $result =isset($result) ? $result : $default;
         return $result;
     }
 
