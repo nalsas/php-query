@@ -189,7 +189,7 @@ abstract class Querier implements PathAccessor {
     
     public function mapRoot(callable $operation){
 
-        if($this->getWhenResultPath()==null){
+        if($this->getWhenResultPath()===null){
             throw new QueryException('please call when() first!');
         }
 
@@ -199,7 +199,7 @@ abstract class Querier implements PathAccessor {
         array_map(function($path) use($obj, $separator, $operation){
             $rowPath =$this->_searchOptions['resultMode']==='value'?$path:static::getHigherLevelPath($path, $separator);
             $row =$obj->get($rowPath);
-            $obj->set($operation($row), $rowPath);
+            $obj->set($operation($row, $rowPath), $rowPath);
         }, $paths);
 
         //let when() result take effect in root object

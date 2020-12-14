@@ -1,2 +1,6 @@
 # php-query
-A php array query tool for complicated array data which could be used in **Schema-Less** db operations of backend programming frequently.
+
+A chainable, lightweight library for php to maniplate(i.e. query/update/delete...) deep nested array, especially useful 
+with json data processing and pre-processing for DB operations.
+
+Document not finish yet, please check out the usage in tests/ArrayQueryTest.php
