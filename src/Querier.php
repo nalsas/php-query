@@ -141,36 +141,16 @@ abstract class Querier implements PathAccessor {
     }
 
     public function replace(array $values){
-        $sep = $this->getSeparator();
-        $conditions = [];
-        $paths =[];
-        foreach($values as $key=>$value){
-            $func = function($k, $v) use ($key){
-                return $k===$key;
-            };
-            $conditions[]=$func;
-        }
-
-        if(empty($conditions)) throw new Exception('empty input is not allowed!');
         $data = $this->get();
-
-        $matchMode = $this->_searchOptions['matchMode'];
-        $this->_searchOptions['matchMode'] = 'or';
-        $this->_find($data, $conditions, $this->getSeparator(), $paths);
-        $this->_searchOptions['matchMode'] = $matchMode;
-
-        //set the exist key
-        array_map(function($k, $v) use ($paths, $sep){
-            if(!isset($paths[$k])) return;
-            foreach($paths[$k] as $path){
-                $calculated=is_callable($v)?$v($this->get(static::getHigherLevelPath($path, $sep))):$v;
-                $this->set($calculated, $path);
+        array_walk_recursive($data, function (&$v)use($values){
+            if(isset($values[$v])){
+                $v = is_callable($values[$v])?$values[$v]($v):$values[$v];
             }
-        }, array_keys($values), $values);
-
+        });
+        $this->set($data);
         return $this;
     }
-    
+
     public function renameKey(array $keyMap){
         $sep = $this->getSeparator();
         $conditions = [];
